@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply antialiased bg-gray-50 text-gray-900;
+  }
+
+  * {
+    @apply box-border;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white border border-gray-200 rounded-xl shadow-sm;
+  }
+
+  .btn-primary {
+    @apply bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700
+           transition font-medium disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-lg
+           hover:bg-gray-50 transition font-medium;
+  }
+
+  .btn-danger {
+    @apply bg-red-50 text-red-600 border border-red-200 px-3 py-1.5 rounded-lg
+           hover:bg-red-100 transition text-sm font-medium;
+  }
+
+  .input {
+    @apply bg-white border border-gray-300 rounded-lg text-gray-900
+           placeholder-gray-400 px-3 py-2 text-sm focus:outline-none
+           focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  }
+
+  .badge-crypto {
+    @apply bg-orange-100 text-orange-700 border border-orange-200 text-xs
+           font-semibold px-2 py-0.5 rounded-full;
+  }
+
+  .badge-stock {
+    @apply bg-blue-100 text-blue-700 border border-blue-200 text-xs
+           font-semibold px-2 py-0.5 rounded-full;
+  }
+}
+
+/* Live pulse dot */
+.live-dot {
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* Price flash animations */
+.flash-green {
+  animation: flashGreen 0.8s ease-out;
+}
+.flash-red {
+  animation: flashRed 0.8s ease-out;
+}
+
+@keyframes flashGreen {
+  0%   { background-color: rgba(34, 197, 94, 0.2); }
+  100% { background-color: transparent; }
+}
+
+@keyframes flashRed {
+  0%   { background-color: rgba(239, 68, 68, 0.2); }
+  100% { background-color: transparent; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: #f1f5f9; }
+::-webkit-scrollbar-thumb  { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }

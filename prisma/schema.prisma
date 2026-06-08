@@ -1,0 +1,172 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts Account[]
+  sessions Session[]
+  alerts   Alert[]
+  webhooks Webhook[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Alert {
+  id          String      @id @default(cuid())
+  userId      String
+  symbol      String      // e.g. BTC, ETH, AAPL, TSLA
+  assetType   AssetType   // CRYPTO or STOCK
+  alertType   AlertType   // PRICE_ABOVE, PRICE_BELOW, PERCENT_CHANGE
+  threshold   Float       // target price or % change
+  isActive    Boolean     @default(true)
+  triggered   Boolean     @default(false)
+  triggeredAt DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  alertTriggerLogs  AlertTriggerLog[]
+
+  @@index([userId, isActive])
+  @@index([symbol, assetType])
+  @@map("alerts")
+}
+
+model AlertTriggerLog {
+  id          String   @id @default(cuid())
+  alertId     String
+  triggeredAt DateTime @default(now())
+  priceAt     Float
+  message     String?
+  aiAnalysis  String?  @db.Text
+
+  alert Alert @relation(fields: [alertId], references: [id], onDelete: Cascade)
+
+  @@map("alert_trigger_logs")
+}
+
+model Webhook {
+  id        String        @id @default(cuid())
+  userId    String
+  name      String
+  url       String
+  secret    String?
+  events    WebhookEvent[]
+  isActive  Boolean       @default(true)
+  lastFired DateTime?
+  failCount Int           @default(0)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveries  WebhookDelivery[]
+
+  @@map("webhooks")
+}
+
+model WebhookDelivery {
+  id           String   @id @default(cuid())
+  webhookId    String
+  event        String
+  payload      String   @db.Text
+  statusCode   Int?
+  success      Boolean  @default(false)
+  responseBody String?  @db.Text
+  deliveredAt  DateTime @default(now())
+
+  webhook Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@map("webhook_deliveries")
+}
+
+model PriceSnapshot {
+  id        String    @id @default(cuid())
+  symbol    String
+  assetType AssetType
+  price     Float
+  change24h Float?    // percent change last 24h
+  volume24h Float?
+  marketCap Float?
+  high24h   Float?
+  low24h    Float?
+  timestamp DateTime  @default(now())
+
+  @@index([symbol, assetType, timestamp])
+  @@map("price_snapshots")
+}
+
+enum AssetType {
+  CRYPTO
+  STOCK
+}
+
+enum AlertType {
+  PRICE_ABOVE
+  PRICE_BELOW
+  PERCENT_CHANGE_UP
+  PERCENT_CHANGE_DOWN
+}
+
+enum WebhookEvent {
+  ALERT_TRIGGERED
+  PRICE_UPDATE
+  ALL
+}
