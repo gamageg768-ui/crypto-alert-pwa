@@ -1,8 +1,7 @@
 {
-  "crons": [
-    {
-      "path": "/api/cron/check-alerts",
-      "schedule": "*/1 * * * *"
+  "functions": {
+    "app/api/cron/check-alerts/route.ts": {
+      "maxDuration": 30
     }
-  ]
+  }
 }
